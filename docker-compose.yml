@@ -1,0 +1,31 @@
+version: '3.7'
+services:
+  PgSQL-DB-Source:
+    image: 'postgres:13.1-alpine'
+    container_name: ${SRC_DB_SERVICE_NAME}
+    ports:
+      - "${SRC_DB_MAPPED_PORT}:5432"
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=${SRC_DB_HOST_AUTH_METHOD}
+      - POSTGRES_USER=${SRC_DB_USER}
+      - POSTGRES_PASSWORD=${SRC_DB_PASSWORD}
+    command: >
+      -c max_wal_size=${SRC_DB_MAX_WAL_SIZE}
+
+  FlyWay-Server_Source:
+    image: 'flyway/flyway:latest'
+    command: -configFiles=/flyway/conf/flyway_source.config -locations=filesystem:/flyway/sql/source -connectRetries=60 migrate
+    volumes:
+      - ./db/flyway/migration/source:/flyway/sql/source
+      - ./db/flyway/config/pg_source_flyway.config:/flyway/conf/flyway_source.config
+    depends_on:
+      - PgSQL-DB-Source
+
+  APP:
+    container_name: app
+    image: app:latest
+    build: app
+    ports:
+      - "${APP_PORT_MAPPING}"
+    depends_on:
+      - FlyWay-Server_Source
