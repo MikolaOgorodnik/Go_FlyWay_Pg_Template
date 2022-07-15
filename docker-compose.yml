@@ -9,8 +9,6 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=${SRC_DB_HOST_AUTH_METHOD}
       - POSTGRES_USER=${SRC_DB_USER}
       - POSTGRES_PASSWORD=${SRC_DB_PASSWORD}
-    command: >
-      -c max_wal_size=${SRC_DB_MAX_WAL_SIZE}
 
   FlyWay-Server_Source:
     image: 'flyway/flyway:latest'
